@@ -1,25 +1,20 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useLanguage } from './i18n.jsx';
 import {
   ArrowUpRight,
-  BadgeCheck,
-  CarFront,
   Check,
+  ChevronDown,
   ChevronRight,
   Clock,
-  Droplets,
   Facebook,
-  Gauge,
   Instagram,
   Mail,
   MapPin,
-  Menu,
   Music2,
   Navigation,
   Phone,
   ShieldCheck,
-  Sparkles,
-  X,
 } from 'lucide-react';
 
 const navItems = [
@@ -27,6 +22,8 @@ const navItems = [
   { id: 'services', label: 'Usluge' },
   { id: 'gallery', label: 'Galerija' },
 ];
+
+const mobileNavItems = [...navItems, { id: 'contact', label: 'Kontakt' }];
 
 const pageIds = ['home', 'services', 'gallery', 'contact'];
 
@@ -50,43 +47,36 @@ const images = {
 const services = [
   {
     title: 'Ručno pranje eksterijera',
-    icon: Droplets,
     text: 'pH-neutralna pena, mekane rukavice, metoda sa dve kante, felne, stakla i završno sušenje peškirom.',
     image: images.bay,
   },
   {
     title: 'Dubinsko čišćenje enterijera',
-    icon: CarFront,
     text: 'Bezbedno čišćenje kože, parna ekstrakcija, tepisi, ventilacija, konzole, patosnice i diskretan završni tretman kabine.',
     image: images.interior,
   },
   {
     title: 'Keramička zaštita',
-    icon: ShieldCheck,
     text: 'Dugotrajna zaštita laka sa pojačanim sjajem, hidrofobnim efektom i UV otpornošću.',
     image: images.polish,
   },
   {
     title: 'Poliranje laka',
-    icon: Sparkles,
     text: 'Jednostepena ili višestepena korekcija za manje swirl tragova, veću dubinu, jasnoću i ogledalsku refleksiju.',
     image: images.detail,
   },
   {
     title: 'Kompletan detailing',
-    icon: BadgeCheck,
     text: 'Potpuna obnova enterijera i eksterijera za premijum vozila, vikend automobile i posebne isporuke.',
     image: images.studio,
   },
   {
     title: 'Čišćenje motornog prostora',
-    icon: Gauge,
     text: 'Kontrolisano odmašćivanje, nežna obrada, pažljivo ispiranje i završna nega plastičnih površina.',
     image: images.wheel,
   },
   {
     title: 'Premium održavajuće pranje',
-    icon: Clock,
     text: 'Planirano luksuzno održavanje za zaštićena i kolekcionarska vozila koja uvek moraju izgledati besprekorno.',
     image: images.hero,
   },
@@ -200,12 +190,13 @@ export default function App() {
 }
 
 function Header({ page, menuOpen, setMenuOpen, navigate }) {
+  const { t } = useLanguage();
   const [navTheme, setNavTheme] = useState('dark');
-  const lightHeader = navTheme === 'light' || menuOpen;
+  const lightHeader = navTheme === 'light';
   const darkHeaderClass =
     navTheme === 'strong-dark'
-      ? 'border-white/18 bg-ink/90 text-white backdrop-blur-2xl'
-      : 'border-white/10 bg-ink/78 text-white backdrop-blur-2xl';
+      ? 'liquid-navbar-strong text-white'
+      : 'liquid-navbar-dark text-white';
 
   useLayoutEffect(() => {
     setNavTheme('dark');
@@ -238,32 +229,25 @@ function Header({ page, menuOpen, setMenuOpen, navigate }) {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b shadow-[0_12px_40px_rgba(0,0,0,0.12)] transition-all duration-300 ${
+      className={`liquid-navbar fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
         lightHeader
-          ? 'border-slate-200/80 bg-white/92 text-ink backdrop-blur-2xl'
+          ? 'liquid-navbar-light text-ink'
           : darkHeaderClass
       }`}
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-8 lg:px-10">
-        <button onClick={() => navigate('home')} className="group flex items-center gap-3 text-left" aria-label="Shine Time početna">
-          <span
-            className={`flex h-10 w-10 items-center justify-center rounded-lg border shadow-glass transition ${
-              lightHeader ? 'border-slate-200 bg-ink text-white' : 'border-white/15 bg-white/10'
-            }`}
-          >
-            <Sparkles className={`h-5 w-5 ${lightHeader ? 'text-white' : 'text-steel'}`} />
-          </span>
+      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:h-20 sm:px-8 lg:px-10">
+        <button onClick={() => navigate('home')} className="group text-left" aria-label={t('Shine Time početna')}>
           <span>
-            <span className={`block font-display text-xl leading-none tracking-normal transition ${lightHeader ? 'text-ink' : 'text-white'}`}>
+            <span className={`block font-display text-lg leading-none tracking-normal transition sm:text-xl ${lightHeader ? 'text-ink' : 'text-white'}`}>
               Shine Time
             </span>
-            <span className={`mt-1 block text-[0.65rem] font-semibold uppercase tracking-[0.22em] transition ${lightHeader ? 'text-ocean/70' : 'text-steel/75'}`}>
+            <span className={`mt-1 block text-[0.58rem] font-semibold uppercase tracking-[0.18em] transition sm:text-[0.65rem] sm:tracking-[0.22em] ${lightHeader ? 'text-ocean/70' : 'text-steel/75'}`}>
               Detailing studio
             </span>
           </span>
         </button>
 
-        <nav className="hidden items-center gap-8 lg:flex" aria-label="Glavna navigacija">
+        <nav className="hidden items-center gap-8 lg:flex" aria-label={t('Glavna navigacija')}>
           {navItems.map((item) => (
             <button
               key={item.id}
@@ -278,61 +262,199 @@ function Header({ page, menuOpen, setMenuOpen, navigate }) {
                     : 'text-white/75 hover:text-white'
               }`}
             >
-              {item.label}
+              {t(item.label)}
             </button>
           ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <LanguageToggle lightHeader={lightHeader} />
           <button
             onClick={() => navigate('contact')}
             className={`shine rounded-lg px-5 py-3 text-sm font-semibold shadow-lg transition hover:-translate-y-0.5 ${
-              lightHeader ? 'bg-ink text-white shadow-slate-900/20 hover:bg-midnight' : 'bg-white text-ink shadow-black/20'
+              lightHeader
+                ? 'shine-bright bg-ink text-white shadow-slate-900/20 hover:bg-midnight'
+                : 'shine-steel bg-white text-ink shadow-black/20'
             }`}
           >
-            Kontakt
+            {t('Kontakt')}
           </button>
         </div>
 
-        <button
-          onClick={() => setMenuOpen((value) => !value)}
-          className={`flex h-11 w-11 items-center justify-center rounded-lg border transition lg:hidden ${
-            lightHeader ? 'border-slate-200 bg-slate-100 text-ink' : 'border-white/15 bg-white/10 text-white'
-          }`}
-          aria-label="Otvori meni"
-        >
-          {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <LanguageToggle lightHeader={lightHeader} />
+          <button
+            onClick={() => setMenuOpen((value) => !value)}
+            className={`flex h-12 w-12 items-center justify-end transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steel ${
+              lightHeader ? 'text-ink' : 'text-white'
+            }`}
+            aria-label={t(menuOpen ? 'Zatvori meni' : 'Otvori meni')}
+            aria-expanded={menuOpen}
+          >
+            <BurgerMark open={menuOpen} />
+          </button>
+        </div>
       </div>
 
-      {menuOpen && (
+      <AnimatePresence initial={false}>
+        {menuOpen && (
+          <motion.div
+            key="mobile-navigation"
+            initial={{ height: 0, opacity: 0, y: -12 }}
+            animate={{ height: 'auto', opacity: 1, y: 0 }}
+            exit={{ height: 0, opacity: 0, y: -12 }}
+            transition={{ height: { duration: 0.32, ease: [0.22, 1, 0.36, 1] }, opacity: { duration: 0.2 }, y: { duration: 0.28, ease: 'easeOut' } }}
+            className="overflow-hidden lg:hidden"
+          >
+            <div className="mx-auto grid max-w-7xl gap-2 px-5 pb-5 pt-2">
+              {mobileNavItems.map((item, index) => (
+                <motion.button
+                  key={item.id}
+                  onClick={() => navigate(item.id)}
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.2, delay: index * 0.035 }}
+                  className={`rounded-lg px-4 py-3 text-left text-sm font-semibold transition-colors ${
+                    lightHeader
+                      ? page === item.id
+                        ? 'bg-ink text-white'
+                        : 'text-slate-700 hover:bg-slate-100 hover:text-ink'
+                      : page === item.id
+                        ? 'bg-white text-ink'
+                        : 'text-white/75 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {t(item.label)}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </header>
+  );
+}
+
+function LanguageToggle({ lightHeader }) {
+  const { language, setLanguage, t } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    const closeOnOutsideClick = (event) => {
+      if (!menuRef.current?.contains(event.target)) setOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [open]);
+
+  const options = [
+    { id: 'en', code: 'EN', label: 'Engleski' },
+    { id: 'sr', code: 'SR', label: 'Srpski' },
+  ];
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className={`inline-flex h-10 items-center justify-center gap-1.5 rounded-md border px-2.5 text-[0.65rem] font-bold uppercase transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-steel ${
+          lightHeader
+            ? 'border-slate-300/60 bg-white/35 text-ink hover:bg-white/65'
+            : 'border-white/15 bg-white/5 text-white hover:bg-white/10'
+        }`}
+        aria-label={t('Izaberi jezik')}
+        aria-haspopup="menu"
+        aria-expanded={open}
+      >
+        <span>{language.toUpperCase()}</span>
+        <ChevronDown className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+      </button>
+
+      {open && (
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`border-t px-5 py-5 backdrop-blur-2xl lg:hidden ${lightHeader ? 'border-slate-200 bg-white/94' : 'border-white/10 bg-ink/90'}`}
+          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className={`absolute right-0 top-[calc(100%+0.55rem)] z-30 w-40 overflow-hidden rounded-lg border p-1.5 shadow-luxury backdrop-blur-2xl ${
+            lightHeader
+              ? 'border-white/80 bg-white/85 text-ink'
+              : 'border-white/15 bg-ink/85 text-white'
+          }`}
+          role="menu"
+          aria-label={t('Izaberi jezik')}
         >
-          <div className="mx-auto grid max-w-7xl gap-2">
-            {navItems.map((item) => (
+          {options.map((option) => {
+            const active = language === option.id;
+            return (
               <button
-                key={item.id}
-                onClick={() => navigate(item.id)}
-                className={`rounded-lg px-4 py-3 text-left text-sm font-semibold transition ${
-                  lightHeader
-                    ? page === item.id
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  setLanguage(option.id);
+                  setOpen(false);
+                }}
+                className={`flex w-full items-center justify-between rounded-md px-3 py-2.5 text-left text-sm font-semibold transition ${
+                  active
+                    ? lightHeader
                       ? 'bg-ink text-white'
-                      : 'text-slate-700 hover:bg-slate-100 hover:text-ink'
-                    : page === item.id
-                      ? 'bg-white text-ink'
+                      : 'bg-white text-ink'
+                    : lightHeader
+                      ? 'text-slate-700 hover:bg-slate-100 hover:text-ink'
                       : 'text-white/75 hover:bg-white/10 hover:text-white'
                 }`}
+                role="menuitemradio"
+                aria-checked={active}
               >
-                {item.label}
+                <span>{t(option.label)}</span>
+                <span className="flex items-center gap-2">
+                  <span className="text-[0.62rem] font-bold opacity-55">{option.code}</span>
+                  {active && <Check className="h-4 w-4" aria-hidden="true" />}
+                </span>
               </button>
-            ))}
-          </div>
+            );
+          })}
         </motion.div>
       )}
-    </header>
+    </div>
+  );
+}
+
+function BurgerMark({ open }) {
+  return (
+    <span
+      className={`relative block h-5 w-6 transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+        open ? 'rotate-[135deg]' : 'rotate-0 delay-200'
+      }`}
+      aria-hidden="true"
+    >
+      <span
+        className={`absolute left-0 h-0.5 w-6 rounded-full bg-current transition-[top] duration-200 ease-out ${
+          open ? 'top-[9px] delay-0' : 'top-[1px] delay-[700ms]'
+        }`}
+      />
+      <span
+        className="absolute left-0 top-[9px] h-0.5 w-6 rounded-full bg-current"
+      />
+      <span
+        className={`absolute left-0 h-0.5 w-6 rounded-full bg-current transition-[top,transform] ease-out ${
+          open
+            ? 'top-[9px] rotate-90 delay-[200ms] duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]'
+            : 'top-[17px] rotate-0 duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]'
+        }`}
+      />
+    </span>
   );
 }
 
@@ -350,25 +472,22 @@ function HomePage({ setPage }) {
 }
 
 function Hero({ setPage }) {
+  const { t } = useLanguage();
   return (
-    <section data-nav-theme="dark" className="relative isolate min-h-[92vh] overflow-hidden bg-ink pt-20 text-white">
-      <img src={images.hero} alt="Luksuzni sportski automobil sa sjajnim lakom" className="absolute inset-0 h-full w-full object-cover opacity-65" />
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,6,11,0.92),rgba(5,12,25,0.74)_42%,rgba(5,12,25,0.20)_100%)]" />
+    <section data-nav-theme="dark" className="mobile-hero relative isolate overflow-hidden bg-ink pt-[4.5rem] text-white sm:min-h-[100svh] sm:pt-20">
+      <img src={images.hero} alt={t('Luksuzni sportski automobil sa sjajnim lakom')} className="absolute inset-0 h-full w-full object-cover opacity-65" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,6,11,0.92),rgba(5,12,25,0.76)_54%,rgba(5,12,25,0.30)_100%)] sm:bg-[linear-gradient(90deg,rgba(3,6,11,0.92),rgba(5,12,25,0.74)_42%,rgba(5,12,25,0.20)_100%)]" />
       <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-ink to-transparent" />
 
-      <div className="relative mx-auto flex min-h-[calc(92vh-5rem)] max-w-7xl items-center px-5 py-20 sm:px-8 lg:px-10">
+      <div className="mobile-hero-inner relative mx-auto flex max-w-7xl items-center px-5 py-10 sm:min-h-[calc(100svh-5rem)] sm:px-8 sm:py-20 lg:px-10">
         <div className="max-w-4xl">
-          <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }} className="mb-7 inline-flex items-center gap-3 rounded-lg border border-white/30 bg-white/12 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-steel backdrop-blur-xl">
-            <span className="h-1.5 w-1.5 rounded-full bg-steel" />
-            Luksuzni detailing studio
-          </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.08 }} className="font-display text-5xl font-bold leading-[0.98] tracking-normal text-white sm:text-6xl lg:text-8xl">
-            Luksuzni auto detailing, prefinjeno izveden.
+          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.08 }} className="font-display text-[2.85rem] font-bold leading-[1.02] tracking-normal text-white sm:text-6xl sm:leading-[0.98] lg:text-8xl">
+            {t('Luksuzni auto detailing, prefinjeno izveden.')}
           </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.16 }} className="mt-8 max-w-2xl text-lg leading-8 text-white/88 sm:text-xl">
-            Diskretan studio za negu vozila po dogovoru, namenjen modelima Mercedes, BMW, Audi, Porsche i svakom automobilu koji zaslužuje besprekoran dolazak.
+          <motion.p initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.16 }} className="mt-6 max-w-2xl text-base leading-7 text-white/88 sm:mt-8 sm:text-xl sm:leading-8">
+            {t('Diskretan studio za negu vozila po dogovoru, namenjen modelima Mercedes, BMW, Audi, Porsche i svakom automobilu koji zaslužuje besprekoran dolazak.')}
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.24 }} className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.24 }} className="mt-8 flex flex-col gap-3 sm:mt-10 sm:flex-row sm:gap-4">
             <Button onClick={() => setPage('contact')} variant="light">
               Kontaktirajte nas
             </Button>
@@ -377,7 +496,7 @@ function Hero({ setPage }) {
             </Button>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.34 }} className="mt-14 grid max-w-3xl grid-cols-3 divide-x divide-white/12 border-y border-white/12 py-6">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.34 }} className="mt-9 grid max-w-3xl grid-cols-3 divide-x divide-white/12 border-y border-white/12 py-5 sm:mt-14 sm:py-6">
             <Stat value="4.9" label="Ocena klijenata" />
             <Stat value="1,800+" label="Uređenih vozila" />
             <Stat value="72h" label="Nega premaza" />
@@ -407,20 +526,21 @@ function ServicesOverview({ setPage }) {
 }
 
 function BeforeAfter() {
+  const { t } = useLanguage();
   return (
     <Section className="bg-white" navTheme="light">
       <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>
-          <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-ocean">Pre / Posle</p>
-          <h2 className="font-display text-4xl leading-tight text-ink sm:text-5xl">Dubina, jasnoća i sjaj koji menjaju siluetu vozila.</h2>
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-ocean">{t('Pre / Posle')}</p>
+          <h2 className="font-display text-4xl leading-tight text-ink sm:text-5xl">{t('Dubina, jasnoća i sjaj koji menjaju siluetu vozila.')}</h2>
           <p className="mt-6 text-lg leading-8 text-slate-600">
-            Naš proces korekcije uklanja vizuelne nepravilnosti sa laka, a zatim zaključava visok sjaj premijum zaštitom.
+            {t('Naš proces korekcije uklanja vizuelne nepravilnosti sa laka, a zatim zaključava visok sjaj premijum zaštitom.')}
           </p>
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             {['Smanjenje swirl tragova', 'Hidrofobna zaštita', 'Obnova kabine na dodir', 'Detaljna završna inspekcija'].map((item) => (
               <div key={item} className="flex items-center gap-3 text-sm font-semibold text-graphite">
                 <Check className="h-5 w-5 text-ocean" />
-                {item}
+                {t(item)}
               </div>
             ))}
           </div>
@@ -437,16 +557,17 @@ function BeforeAfter() {
 }
 
 function WhyChoose() {
+  const { t } = useLanguage();
   return (
     <Section className="bg-chrome" navTheme="light">
       <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
         <Reveal>
-          <div className="relative min-h-[520px] overflow-hidden rounded-lg shadow-luxury">
-            <img src={images.studio} alt="Premijum studio za auto detailing" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
-              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-steel">Nega u privatnom boksu</p>
-              <p className="mt-3 max-w-md text-2xl font-semibold">Osmišljeno oko kontrolisanog osvetljenja, čistog alata i preciznog ručnog rada.</p>
+          <div className="relative min-h-[380px] overflow-hidden rounded-lg shadow-luxury sm:min-h-[520px]">
+            <img src={images.studio} alt={t('Premijum studio za auto detailing')} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 z-[1] bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 z-10 p-6 text-white sm:p-10">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-steel sm:text-sm sm:tracking-[0.22em]">{t('Nega u privatnom boksu')}</p>
+              <p className="mt-3 max-w-md text-xl font-semibold sm:text-2xl">{t('Osmišljeno oko kontrolisanog osvetljenja, čistog alata i preciznog ručnog rada.')}</p>
             </div>
           </div>
         </Reveal>
@@ -456,7 +577,7 @@ function WhyChoose() {
             {why.map((item) => (
               <div key={item} className="glass-panel flex items-start gap-4 rounded-lg p-5">
                 <ShieldCheck className="mt-0.5 h-5 w-5 flex-none text-ocean" />
-                <p className="text-base leading-7 text-slate-700">{item}</p>
+                <p className="text-base leading-7 text-slate-700">{t(item)}</p>
               </div>
             ))}
           </div>
@@ -481,24 +602,25 @@ function GalleryPreview({ setPage }) {
 }
 
 function VisitStudioHome() {
+  const { t } = useLanguage();
   return (
-    <section data-nav-theme="strong-dark" className="bg-ink px-5 py-20 text-white sm:px-8 lg:px-10">
+    <section data-nav-theme="strong-dark" className="bg-ink px-5 py-14 text-white sm:px-8 sm:py-20 lg:px-10">
       <div className="mx-auto max-w-7xl overflow-hidden rounded-lg bg-radial-luxury shadow-glass">
         <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="p-8 sm:p-10 lg:p-12">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-steel">Posetite naš studio</p>
-            <h2 className="font-display text-4xl leading-tight sm:text-5xl">Doživite završnu obradu uživo.</h2>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-white/84">
-              Posetite naš privatni detailing boks za premijum negu, savetovanje o zaštiti laka i bliži uvid u naš studijski proces.
+          <div className="p-6 sm:p-10 lg:p-12">
+            <p className="mb-4 text-xs font-bold uppercase tracking-[0.24em] text-steel">{t('Posetite naš studio')}</p>
+            <h2 className="font-display text-3xl leading-tight sm:text-5xl">{t('Doživite završnu obradu uživo.')}</h2>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-white/84 sm:text-lg sm:leading-8">
+              {t('Posetite naš privatni detailing boks za premijum negu, savetovanje o zaštiti laka i bliži uvid u naš studijski proces.')}
             </p>
             <div className="mt-6 grid gap-3 text-sm font-semibold text-white/90 sm:grid-cols-2">
               <span className="inline-flex items-center gap-3">
                 <MapPin className="h-4 w-4 text-steel" />
-                {studioContact.address}
+                {t(studioContact.address)}
               </span>
               <span className="inline-flex items-center gap-3">
                 <Clock className="h-4 w-4 text-steel" />
-                {studioContact.hours}
+                {t(studioContact.hours)}
               </span>
             </div>
             <div className="mt-8">
@@ -506,19 +628,19 @@ function VisitStudioHome() {
               href={studioContact.mapsUrl}
               target="_blank"
               rel="noreferrer"
-              className="shine inline-flex items-center justify-center gap-3 rounded-lg bg-white px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] text-ink shadow-lg shadow-black/20 transition duration-300 hover:-translate-y-0.5 hover:bg-steel"
+              className="shine shine-steel inline-flex w-full items-center justify-center gap-3 rounded-lg bg-white px-5 py-4 text-sm font-bold uppercase tracking-[0.14em] text-ink shadow-lg shadow-black/20 transition duration-300 hover:-translate-y-0.5 hover:bg-steel sm:w-auto sm:px-6 sm:tracking-[0.16em]"
             >
-              Posetite nas
+              {t('Posetite nas')}
               <Navigation className="h-4 w-4" />
             </a>
             </div>
           </div>
-          <div className="relative min-h-[360px] overflow-hidden lg:min-h-full">
-            <img src={images.studio} alt="Poseta premijum detailing studiju" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent lg:bg-[linear-gradient(90deg,rgba(7,9,13,0.55),rgba(7,9,13,0.08))]" />
-            <div className="absolute bottom-6 left-6 right-6 rounded-lg border border-white/15 bg-ink/70 p-5 text-white backdrop-blur-2xl">
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-steel">Privatni boks 3</p>
-              <p className="mt-2 font-display text-2xl">Shine Time, Leskovac</p>
+          <div className="relative min-h-[300px] overflow-hidden sm:min-h-[360px] lg:min-h-full">
+            <img src={images.studio} alt={t('Poseta premijum detailing studiju')} className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 z-[1] bg-gradient-to-t from-ink/80 via-ink/20 to-transparent lg:bg-[linear-gradient(90deg,rgba(7,9,13,0.55),rgba(7,9,13,0.08))]" />
+            <div className="absolute bottom-5 left-5 right-5 z-10 rounded-lg border border-white/15 bg-ink/70 p-4 text-white backdrop-blur-2xl sm:bottom-6 sm:left-6 sm:right-6 sm:p-5">
+              <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-steel sm:text-xs sm:tracking-[0.22em]">{t('Privatni boks 3')}</p>
+              <p className="mt-2 font-display text-xl sm:text-2xl">Shine Time, Leskovac</p>
             </div>
           </div>
         </div>
@@ -528,6 +650,7 @@ function VisitStudioHome() {
 }
 
 function ServicesPage({ setPage }) {
+  const { t } = useLanguage();
   return (
     <PageShell eyebrow="Usluge" title="Kompletan detailing meni za luksuzna vozila." text="Svaki tretman se izvodi čistim materijalima, pažljivim ručnim radom i završnim standardom dostojnim premijum automobila.">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -535,11 +658,11 @@ function ServicesPage({ setPage }) {
           <ServiceCard key={service.title} service={service} index={index} detailed />
         ))}
       </div>
-      <div className="mt-16 grid gap-8 rounded-lg bg-ink p-8 text-white shadow-glass lg:grid-cols-[1fr_0.75fr] lg:p-12">
+      <div className="mt-10 grid gap-8 rounded-lg bg-ink p-6 text-white shadow-glass sm:mt-16 sm:p-8 lg:grid-cols-[1fr_0.75fr] lg:p-12">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">Individualna nega</p>
-          <h2 className="mt-4 font-display text-4xl">Potreban vam je prilagođen plan korekcije?</h2>
-          <p className="mt-4 max-w-2xl leading-8 text-white/84">Preporuku za keramiku, poliranje ili intervale održavanja dajemo tek nakon pregleda debljine laka, tipa završnice, stanja lajsni i materijala u kabini.</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">{t('Individualna nega')}</p>
+          <h2 className="mt-4 font-display text-3xl sm:text-4xl">{t('Potreban vam je prilagođen plan korekcije?')}</h2>
+          <p className="mt-4 max-w-2xl leading-7 text-white/84 sm:leading-8">{t('Preporuku za keramiku, poliranje ili intervale održavanja dajemo tek nakon pregleda debljine laka, tipa završnice, stanja lajsni i materijala u kabini.')}</p>
         </div>
         <div className="flex items-center lg:justify-end">
           <Button onClick={() => setPage('contact')} variant="light">
@@ -552,13 +675,14 @@ function ServicesPage({ setPage }) {
 }
 
 function GalleryPage({ setPage }) {
+  const { t } = useLanguage();
   return (
     <PageShell eyebrow="Galerija" title="Sjaj, refleksija i ručno završeni detalji." text="Privremene fotografije prikazuju željeni ton sajta dok ne budu spremne autentične fotografije vašeg studija.">
       <GalleryGrid />
-      <div className="mt-16 grid items-center gap-8 rounded-lg bg-white p-8 shadow-luxury lg:grid-cols-[1fr_auto] lg:p-12">
+      <div className="mt-10 grid items-center gap-8 rounded-lg bg-white p-6 shadow-luxury sm:mt-16 sm:p-8 lg:grid-cols-[1fr_auto] lg:p-12">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-ocean">Vaš automobil je sledeći</p>
-          <h2 className="mt-4 font-display text-4xl text-ink">Neka sledeća refleksija bude vaša.</h2>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-ocean">{t('Vaš automobil je sledeći')}</p>
+          <h2 className="mt-4 font-display text-3xl sm:text-4xl text-ink">{t('Neka sledeća refleksija bude vaša.')}</h2>
         </div>
         <Button onClick={() => setPage('contact')} variant="primary">
           Kontaktirajte nas
@@ -569,6 +693,7 @@ function GalleryPage({ setPage }) {
 }
 
 function ContactPage() {
+  const { t } = useLanguage();
   return (
     <PageShell eyebrow="Kontakt / Posetite nas" title="Posetite naš premijum detailing studio." text="Pozovite nas, pošaljite email, zapratite nas ili pronađite put do našeg privatnog boksa. Rado primamo luksuzna vozila za posete studiju i detailing konsultacije.">
       <div className="grid gap-8 lg:grid-cols-4">
@@ -588,11 +713,11 @@ function ContactPage() {
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <Reveal>
-          <div className="h-full rounded-lg bg-ink p-8 text-white shadow-glass lg:p-10">
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">Povežite se</p>
-            <h2 className="mt-4 font-display text-4xl">Pratite završnu obradu iz studija.</h2>
-            <p className="mt-5 leading-8 text-white/84">
-              Pogledajte korekcije laka, sjaj keramičke zaštite, detalje iz wash baya i trenutke isporuke na našim društvenim mrežama.
+          <div className="h-full rounded-lg bg-ink p-6 text-white shadow-glass sm:p-8 lg:p-10">
+            <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">{t('Povežite se')}</p>
+            <h2 className="mt-4 font-display text-3xl sm:text-4xl">{t('Pratite završnu obradu iz studija.')}</h2>
+            <p className="mt-5 leading-7 text-white/84 sm:leading-8">
+              {t('Pogledajte korekcije laka, sjaj keramičke zaštite, detalje iz wash baya i trenutke isporuke na našim društvenim mrežama.')}
             </p>
             <div className="mt-8 grid gap-3">
               {socials.map((item) => {
@@ -629,20 +754,21 @@ function ContactPage() {
 }
 
 function PageShell({ eyebrow, title, text, children }) {
+  const { t } = useLanguage();
   return (
     <div>
-      <section data-nav-theme="dark" className="relative overflow-hidden bg-radial-luxury px-5 pb-24 pt-44 text-white sm:px-8 lg:px-10 lg:pb-32 lg:pt-52">
+      <section data-nav-theme="dark" className="relative overflow-hidden bg-radial-luxury px-5 pb-16 pt-32 text-white sm:px-8 sm:pb-24 sm:pt-44 lg:px-10 lg:pb-32 lg:pt-52">
         <div className="absolute inset-0 opacity-30">
           <img src={images.polish} alt="" className="h-full w-full object-cover" />
         </div>
         <div className="absolute inset-0 bg-ink/70" />
         <div className="relative mx-auto max-w-7xl">
-          <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-steel">{eyebrow}</p>
-          <h1 className="max-w-4xl font-display text-5xl leading-tight sm:text-6xl lg:text-7xl">{title}</h1>
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-white/84">{text}</p>
+          <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-steel">{t(eyebrow)}</p>
+          <h1 className="max-w-4xl font-display text-4xl leading-tight sm:text-6xl lg:text-7xl">{t(title)}</h1>
+          <p className="mt-5 max-w-2xl text-base leading-7 text-white/84 sm:mt-7 sm:text-lg sm:leading-8">{t(text)}</p>
         </div>
       </section>
-      <section data-nav-theme="light" className="px-5 py-20 sm:px-8 lg:px-10 lg:py-28">
+      <section data-nav-theme="light" className="px-5 py-14 sm:px-8 sm:py-20 lg:px-10 lg:py-28">
         <div className="mx-auto max-w-7xl">{children}</div>
       </section>
     </div>
@@ -651,18 +777,19 @@ function PageShell({ eyebrow, title, text, children }) {
 
 function Section({ children, className = '', navTheme = 'light' }) {
   return (
-    <section data-nav-theme={navTheme} className={`px-5 py-20 sm:px-8 lg:px-10 lg:py-28 ${className}`}>
+    <section data-nav-theme={navTheme} className={`px-5 py-14 sm:px-8 sm:py-20 lg:px-10 lg:py-28 ${className}`}>
       <div className="mx-auto max-w-7xl">{children}</div>
     </section>
   );
 }
 
 function SectionHeader({ eyebrow, title, text, light = false, compact = false }) {
+  const { t } = useLanguage();
   return (
     <Reveal className={`${compact ? '' : 'mx-auto mb-14 max-w-3xl text-center'}`}>
-      <p className={`mb-4 text-xs font-bold uppercase tracking-[0.24em] ${light ? 'text-steel' : 'text-ocean'}`}>{eyebrow}</p>
-      <h2 className={`font-display text-4xl leading-tight sm:text-5xl ${light ? 'text-white' : 'text-ink'}`}>{title}</h2>
-      <p className={`mt-5 text-lg leading-8 ${light ? 'text-white/84' : 'text-slate-600'}`}>{text}</p>
+      <p className={`mb-4 text-xs font-bold uppercase tracking-[0.24em] ${light ? 'text-steel' : 'text-ocean'}`}>{t(eyebrow)}</p>
+      <h2 className={`font-display text-3xl leading-tight sm:text-5xl ${light ? 'text-white' : 'text-ink'}`}>{t(title)}</h2>
+      <p className={`mt-4 text-base leading-7 sm:mt-5 sm:text-lg sm:leading-8 ${light ? 'text-white/84' : 'text-slate-600'}`}>{t(text)}</p>
     </Reveal>
   );
 }
@@ -682,47 +809,71 @@ function Reveal({ children, delay = 0, className = '' }) {
 }
 
 function Button({ children, onClick, variant = 'primary' }) {
+  const { t } = useLanguage();
+  const [outlineActive, setOutlineActive] = useState(false);
+  const outlineTimer = useRef(null);
+  const shineTone = variant === 'primary' || variant === 'dark' ? 'shine-bright' : 'shine-steel';
   const styles = {
     primary: 'bg-ink text-white shadow-lg shadow-slate-900/20 hover:bg-midnight',
     light: 'bg-white text-ink shadow-lg shadow-black/20 hover:bg-steel',
     dark: 'border border-white/35 bg-white/10 text-white backdrop-blur-xl hover:bg-white/20',
-    outline: 'border border-slate-300 bg-white text-ink shadow-sm hover:border-ink hover:bg-ink hover:text-white',
+    outline: 'outline-shine border border-slate-300 bg-white text-ink shadow-sm',
   };
 
+  useEffect(() => () => window.clearTimeout(outlineTimer.current), []);
+
+  function handleClick() {
+    const touchInteraction = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+
+    if (variant !== 'outline' || !touchInteraction) {
+      onClick?.();
+      return;
+    }
+
+    if (outlineActive) return;
+    setOutlineActive(true);
+    outlineTimer.current = window.setTimeout(() => {
+      setOutlineActive(false);
+      onClick?.();
+    }, 800);
+  }
+
   return (
-    <button onClick={onClick} className={`shine inline-flex items-center justify-center gap-3 rounded-lg px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] transition duration-300 hover:-translate-y-0.5 ${styles[variant]}`}>
-      {children}
+    <button
+      onClick={handleClick}
+      aria-busy={outlineActive || undefined}
+      className={`shine ${shineTone} ${outlineActive ? 'outline-shine-active' : ''} inline-flex w-full items-center justify-center gap-3 rounded-lg px-5 py-4 text-sm font-bold uppercase tracking-[0.14em] transition duration-300 hover:-translate-y-0.5 sm:w-auto sm:px-6 sm:tracking-[0.16em] ${styles[variant]}`}
+    >
+      {typeof children === 'string' ? t(children) : children}
       <ArrowUpRight className="h-4 w-4" />
     </button>
   );
 }
 
 function Stat({ value, label }) {
+  const { t } = useLanguage();
   return (
-    <div className="px-4 first:pl-0">
-      <p className="font-display text-3xl leading-none text-white sm:text-4xl">{value}</p>
-      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/78">{label}</p>
+    <div className="px-3 first:pl-0 sm:px-4">
+      <p className="font-display text-2xl leading-none text-white sm:text-4xl">{value}</p>
+      <p className="mt-2 text-[0.64rem] font-semibold uppercase tracking-[0.13em] text-white/78 sm:text-xs sm:tracking-[0.18em]">{t(label)}</p>
     </div>
   );
 }
 
 function ServiceCard({ service, index, detailed = false }) {
-  const Icon = service.icon;
+  const { t } = useLanguage();
   return (
     <Reveal delay={index * 0.06}>
       <article className="group h-full overflow-hidden rounded-lg bg-white shadow-luxury transition duration-300 hover:-translate-y-1">
-        <div className="image-sheen relative h-64 overflow-hidden">
-          <img src={service.image} alt={service.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
-          <div className="absolute left-5 top-5 flex h-12 w-12 items-center justify-center rounded-lg bg-white/92 text-ocean shadow-lg backdrop-blur-xl">
-            <Icon className="h-5 w-5" />
-          </div>
+        <div className="relative h-52 overflow-hidden sm:h-64">
+          <img src={service.image} alt={t(service.title)} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
         </div>
-        <div className="p-7">
-          <h3 className="font-display text-2xl text-ink">{service.title}</h3>
-          <p className="mt-4 leading-7 text-slate-600">{service.text}</p>
+        <div className="p-6 sm:p-7">
+          <h3 className="font-display text-[1.65rem] leading-tight text-ink sm:text-2xl">{t(service.title)}</h3>
+          <p className="mt-4 leading-7 text-slate-600">{t(service.text)}</p>
           {detailed && (
             <button className="mt-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.14em] text-ocean">
-              Uključena nega
+              {t('Uključena nega')}
               <ChevronRight className="h-4 w-4" />
             </button>
           )}
@@ -733,27 +884,30 @@ function ServiceCard({ service, index, detailed = false }) {
 }
 
 function ResultImage({ label, image, highlight = false }) {
+  const { t } = useLanguage();
+  const translatedLabel = t(label);
   return (
-    <div className={`relative min-h-[430px] overflow-hidden rounded-lg shadow-luxury ${highlight ? 'sm:mt-12' : ''}`}>
-      <img src={image} alt={`Rezultat detailinga: ${label}`} className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-ink/78 via-transparent to-transparent" />
-      <span className="absolute bottom-5 left-5 rounded-lg bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-ink shadow-lg">{label}</span>
+    <div className={`relative min-h-[300px] overflow-hidden rounded-lg shadow-luxury sm:min-h-[430px] ${highlight ? 'sm:mt-12' : ''}`}>
+      <img src={image} alt={`${t('Rezultat detailinga')}: ${translatedLabel}`} className="absolute inset-0 h-full w-full object-cover" />
+      <div className="absolute inset-0 z-[1] bg-gradient-to-t from-ink/78 via-transparent to-transparent" />
+      <span className="absolute bottom-5 left-5 z-10 rounded-lg bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-ink shadow-lg">{translatedLabel}</span>
     </div>
   );
 }
 
 function GalleryGrid({ preview = false }) {
+  const { t } = useLanguage();
   const items = preview ? gallery.slice(0, 4) : gallery;
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item, index) => (
         <Reveal key={item.title} delay={index * 0.05}>
           <figure className={`group relative overflow-hidden rounded-lg shadow-luxury ${index === 0 && !preview ? 'lg:col-span-2' : ''}`}>
-            <img src={item.image} alt={item.title} className="h-[360px] w-full object-cover transition duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/78 via-ink/8 to-transparent opacity-90" />
-            <figcaption className="absolute bottom-0 left-0 right-0 p-6">
-              <p className="text-xs font-bold uppercase tracking-[0.2em] text-steel">Shine Time završna obrada</p>
-              <h3 className="mt-2 font-display text-2xl text-white">{item.title}</h3>
+            <img src={item.image} alt={t(item.title)} className="h-[290px] w-full object-cover transition duration-700 group-hover:scale-105 sm:h-[360px]" />
+            <div className="absolute inset-0 z-[1] bg-gradient-to-t from-ink/78 via-ink/8 to-transparent opacity-90" />
+            <figcaption className="absolute bottom-0 left-0 right-0 z-10 p-6">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-steel">{t('Shine Time završna obrada')}</p>
+              <h3 className="mt-2 font-display text-xl sm:text-2xl text-white">{t(item.title)}</h3>
             </figcaption>
           </figure>
         </Reveal>
@@ -763,16 +917,17 @@ function GalleryGrid({ preview = false }) {
 }
 
 function ContactCard({ icon: Icon, title, text, href, dark = false }) {
+  const { t } = useLanguage();
   const content = (
     <div className={`group h-full rounded-lg p-6 shadow-luxury transition duration-300 hover:-translate-y-1 ${dark ? 'bg-ink text-white' : 'border border-slate-200 bg-white text-ink'}`}>
       <span className={`flex h-12 w-12 items-center justify-center rounded-lg ${dark ? 'bg-white/10 text-steel' : 'bg-ocean text-white'}`}>
         <Icon className="h-5 w-5" />
       </span>
-      <p className={`mt-6 text-xs font-bold uppercase tracking-[0.2em] ${dark ? 'text-steel' : 'text-ocean'}`}>{title}</p>
-      <p className={`mt-3 min-w-0 break-words text-lg font-semibold leading-7 ${dark ? 'text-white' : 'text-ink'}`} style={{ overflowWrap: 'anywhere' }}>{text}</p>
+      <p className={`mt-6 text-xs font-bold uppercase tracking-[0.2em] ${dark ? 'text-steel' : 'text-ocean'}`}>{t(title)}</p>
+      <p className={`mt-3 min-w-0 break-words text-lg font-semibold leading-7 ${dark ? 'text-white' : 'text-ink'}`} style={{ overflowWrap: 'anywhere' }}>{t(text)}</p>
       {href && (
         <span className={`mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] ${dark ? 'text-steel' : 'text-ocean'}`}>
-          Otvori
+          {t('Otvori')}
           <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
         </span>
       )}
@@ -791,6 +946,8 @@ function ContactCard({ icon: Icon, title, text, href, dark = false }) {
 }
 
 function ContactAction({ href, icon: Icon, label, variant }) {
+  const { t } = useLanguage();
+  const shineTone = variant === 'light' ? 'shine-steel' : 'shine-bright';
   const styles =
     variant === 'light'
       ? 'bg-white text-ink shadow-lg shadow-black/20 hover:bg-steel'
@@ -801,32 +958,33 @@ function ContactAction({ href, icon: Icon, label, variant }) {
       href={href}
       target={href.startsWith('http') ? '_blank' : undefined}
       rel={href.startsWith('http') ? 'noreferrer' : undefined}
-      className={`shine inline-flex items-center justify-center gap-3 rounded-lg px-6 py-4 text-sm font-bold uppercase tracking-[0.16em] transition duration-300 hover:-translate-y-0.5 ${styles}`}
+      className={`shine ${shineTone} inline-flex w-full items-center justify-center gap-3 rounded-lg px-5 py-4 text-sm font-bold uppercase tracking-[0.14em] transition duration-300 hover:-translate-y-0.5 sm:w-auto sm:px-6 sm:tracking-[0.16em] ${styles}`}
     >
-      {label}
+      {t(label)}
       <Icon className="h-4 w-4" />
     </a>
   );
 }
 
 function MapPanel() {
+  const { t } = useLanguage();
   return (
-    <div className="relative min-h-[560px] overflow-hidden rounded-lg bg-radial-luxury shadow-luxury">
+    <div className="relative min-h-[470px] overflow-hidden rounded-lg bg-radial-luxury shadow-luxury sm:min-h-[560px]">
       <div className="absolute inset-0 opacity-40">
-        <img src={images.studio} alt="Lokacija studija Shine Time" className="h-full w-full object-cover" />
+        <img src={images.studio} alt={t('Lokacija studija Shine Time')} className="h-full w-full object-cover" />
       </div>
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(7,9,13,0.88),rgba(7,22,43,0.72))]" />
-      <div className="absolute inset-8 rounded-lg border border-white/15">
+      <div className="absolute inset-5 rounded-lg border border-white/15 sm:inset-8">
         <div className="absolute left-[12%] top-[28%] h-px w-[74%] rotate-[-18deg] bg-white/20" />
         <div className="absolute left-[18%] top-[58%] h-px w-[68%] rotate-[14deg] bg-white/14" />
         <div className="absolute left-[48%] top-[8%] h-[78%] w-px rotate-[8deg] bg-white/14" />
         <div className="absolute left-[28%] top-[18%] h-[62%] w-px rotate-[-24deg] bg-white/10" />
       </div>
-      <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">Mapa studija</p>
-        <h3 className="mt-3 font-display text-4xl">Niška Ulica 8, Leskovac</h3>
-        <p className="mt-4 max-w-xl leading-8 text-white/84">
-          Koristite navigaciju do ulaza u privatni boks. Parking za klijente nalazi se neposredno pored studija.
+      <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-10">
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-steel">{t('Mapa studija')}</p>
+        <h3 className="mt-3 font-display text-3xl sm:text-4xl">{t('Niška Ulica 8, Leskovac')}</h3>
+        <p className="mt-4 max-w-xl leading-7 text-white/84 sm:leading-8">
+          {t('Koristite navigaciju do ulaza u privatni boks. Parking za klijente nalazi se neposredno pored studija.')}
         </p>
         <div className="mt-6">
           <ContactAction href={studioContact.mapsUrl} icon={Navigation} label="Navigacija" variant="light" />
@@ -837,14 +995,15 @@ function MapPanel() {
 }
 
 function Footer({ navigate }) {
+  const { t } = useLanguage();
   return (
-    <footer className="bg-ink px-5 py-16 text-white sm:px-8 lg:px-10">
+    <footer className="bg-ink px-5 pb-[calc(4rem+env(safe-area-inset-bottom))] pt-16 text-white sm:px-8 sm:py-16 lg:px-10">
       <div className="mx-auto grid max-w-7xl gap-10 border-t border-white/10 pt-10 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
         <div>
           <div className="flex">
             <BrandLogo size="footer" />
           </div>
-          <p className="mt-3 max-w-xl leading-7 text-white/75">Luksuzno pranje, korekcija laka, zaštitni premazi i nega enterijera za vozila koja zaslužuju viši, mirniji standard.</p>
+          <p className="mt-3 max-w-xl leading-7 text-white/75">{t('Luksuzno pranje, korekcija laka, zaštitni premazi i nega enterijera za vozila koja zaslužuju viši, mirniji standard.')}</p>
           <div className="mt-6 flex flex-wrap gap-3">
             <ContactAction href={`tel:${studioContact.phone.replace(/[^+\d]/g, '')}`} icon={Phone} label="Pozovite sada" variant="light" />
             <ContactAction href={studioContact.mapsUrl} icon={Navigation} label="Navigacija" variant="dark" />
@@ -852,11 +1011,11 @@ function Footer({ navigate }) {
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-steel">Kontakt</p>
+          <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-steel sm:text-xs sm:tracking-[0.22em]">{t('Kontakt')}</p>
           <div className="mt-5 grid gap-4 text-sm leading-6 text-white/78">
             <span className="flex gap-3">
               <MapPin className="mt-0.5 h-4 w-4 flex-none text-steel" />
-              {studioContact.address}
+              {t(studioContact.address)}
             </span>
             <span className="flex gap-3">
               <Phone className="mt-0.5 h-4 w-4 flex-none text-steel" />
@@ -868,17 +1027,17 @@ function Footer({ navigate }) {
             </span>
             <span className="flex gap-3">
               <Clock className="mt-0.5 h-4 w-4 flex-none text-steel" />
-              {studioContact.hours}
+              {t(studioContact.hours)}
             </span>
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-steel">Sadržaj</p>
+          <p className="text-[0.64rem] font-bold uppercase tracking-[0.18em] text-steel sm:text-xs sm:tracking-[0.22em]">{t('Sadržaj')}</p>
           <div className="mt-5 flex flex-wrap gap-4">
           {navItems.map((item) => (
             <button key={item.id} onClick={() => navigate(item.id)} className="text-sm font-medium text-white/75 transition hover:text-white">
-              {item.label}
+              {t(item.label)}
             </button>
           ))}
           </div>
